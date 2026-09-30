@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LUVIA — Luxury Handcrafted Designer Leather Bags</title>
+    <meta
+      name="description"
+      content="Luvia — Timeless luxury crafted for modern elegance. Handcrafted designer handbags, evening clutches, luxury totes, and exclusive limited drops."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./src/styles/index.css" />
+
+    <!-- React 18 & Babel Standalone -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect, useContext, createContext } = React;
+
+      // Robust Self-Contained SPA Router
+      const RouterContext = createContext({ currentPath: '/' });
+
+      const Router = ({ children }) => {
+        const getPath = () => {
+          const hash = window.location.hash.replace(/^#/, '');
+          if (!hash || hash === '') return '/';
+          return hash.split('?')[0];
+        };
+
+        const [currentPath, setCurrentPath] = useState(getPath());
+
+        useEffect(() => {
+          const handleHashChange = () => {
+            setCurrentPath(getPath());
+          };
+          window.addEventListener('hashchange', handleHashChange);
+          return () => window.removeEventListener('hashchange', handleHashChange);
+        }, []);
+
+        const navigate = (path) => {
+          window.location.hash = path;
+          setCurrentPath(path);
+        };
+
+        return (
+          <RouterContext.Provider value={{ currentPath, navigate }}>
+            {children}
+          </RouterContext.Provider>
+        );
+      };
+
+      const useLocation = () => {
+        const ctx = useContext(RouterContext);
+        return { pathname: ctx ? ctx.currentPath : '/' };
+      };
+
+      const useNavigate = () => {
+        const ctx = useContext(RouterContext);
+        return ctx ? ctx.navigate : (p) => { window.location.hash = p; };
+      };
+
+      const Link = ({ to, children, className, style, onClick, title, ...props }) => {
+        const { navigate } = useContext(RouterContext);
+        const handleClick = (e) => {
+          if (to && to.startsWith('/#')) {
+            // Anchor scroll on home
+            return;
+          }
+          if (to && to.startsWith('#')) {
+            return;
+          }
+          e.preventDefault();
+          navigate(to);
+          if (onClick) onClick(e);
+        };
+        return (
+          <a href={`#${to}`} className={className} style={style} onClick={handleClick} title={title} {...props}>
+            {children}
+          </a>
+        );
+      };
+
+      const Routes = ({ children }) => {
+        const { currentPath } = useContext(RouterContext);
+        let match = null;
+        let fallback = null;
+
+        React.Children.forEach(children, (child) => {
+          if (!React.isValidElement(child)) return;
+          if (child.props.path === currentPath) {
+            match = child.props.element;
+          } else if (child.props.path === '*') {
+            fallback = child.props.element;
+          }
+        });
+
+        return match || fallback || null;
+      };
+
+      const Route = () => null;
+
+      // Product catalog data
+      const products = [
+        {
+          id: "royal-luxe-tote",
+          name: "Royal Luxe Tote",
+          category: "Signature Collection",
+          price: 18999,
+          originalPrice: 25000,
+          tag: "Bestseller",
+          image: "./public/images/hero-bag.png",
+          thumbnails: [
+            "./public/images/hero-bag.png",
+            "./public/images/designer-handbag.png",
+            "./public/images/craftsmanship-bag.png",
+            "./public/images/evening-clutch.png"
+          ],
+          tagline: "Uncompromising luxury for the modern connoisseur.",
+          description: "Handcrafted from full-grain Italian calfskin with solid brass 24K gold-plated hardware. Features a suede-lined main compartment, dedicated laptop sleeve, and hand-stitched rolled leather handles.",
+          features: [
+            "100% Genuine Italian Calfskin",
+            "24K Gold-plated hardware & zipper pulls",
+            "Dual interior slip pockets & zipped compartment",
+            "Reinforced base with protective metal studs",
+            "Detachable & adjustable leather shoulder strap",
+            "Individual serial number engraved plaque"
+          ],
+          dimensions: {
+            height: "28 cm",
+            width: "35 cm",
+            depth: "14 cm",
+            handleDrop: "20 cm"
+          },
+          colors: [
+            { name: "Burgundy", hex: "#581825" },
+            { name: "Obsidian Black", hex: "#111115" },
+            { name: "Dark Emerald", hex: "#0b3824" },
+            { name: "Rose Gold", hex: "#b76e79" }
+          ]
+        },
+        {
+          id: "elysian-evening-clutch",
+          name: "Elysian Evening Clutch",
+          category: "Evening & Gala",
+          price: 12499,
+          originalPrice: 16500,
+          tag: "Exclusive",
+          image: "./public/images/evening-clutch.png",
+          thumbnails: [
+            "./public/images/evening-clutch.png",
+            "./public/images/hero-bag.png",
+            "./public/images/designer-handbag.png"
+          ],
+          tagline: "A scintillating statement of evening glamour.",
+          description: "Swarovski crystal-embellished minaudière with a magnetic frame closure and drop-in delicate chain strap. Designed to turn heads under the ballroom chandeliers.",
+          features: [
+            "Hand-set faceted Austrian crystals",
+            "Satin lining with vanity mirror",
+            "Concealable gold-tone chain strap",
+            "Custom magnetic lock mechanism"
+          ],
+          dimensions: {
+            height: "12 cm",
+            width: "20 cm",
+            depth: "5 cm",
+            handleDrop: "55 cm (Chain)"
+          },
+          colors: [
+            { name: "Champagne Gold", hex: "#d4af37" },
+            { name: "Midnight Onyx", hex: "#0c0c10" },
+            { name: "Silver Ice", hex: "#d8d8d8" }
+          ]
+        },
+        {
+          id: "artisan-monogram-satchel",
+          name: "Artisan Monogram Satchel",
+          category: "Heritage Edition",
+          price: 21999,
+          originalPrice: 28000,
+          tag: "Limited",
+          image: "./public/images/designer-handbag.png",
+          thumbnails: [
+            "./public/images/designer-handbag.png",
+            "./public/images/craftsmanship.png",
+            "./public/images/hero-bag.png"
+          ],
+          tagline: "Generational craftsmanship meets contemporary silhouettes.",
+          description: "Embossed heritage monogram leather with hand-burnished edge paint and signature turn-lock closure. A timeless companion for everyday sophistication.",
+          features: [
+            "Hand-buffed vegetable-tanned leather",
+            "Antiqued brass signature turn-lock",
+            "Accordion interior with 3 compartments",
+            "Signature dust bag & box included"
+          ],
+          dimensions: {
+            height: "22 cm",
+            width: "30 cm",
+            depth: "11 cm",
+            handleDrop: "15 cm"
+          },
+          colors: [
+            { name: "Cognac Brown", hex: "#6c3b1e" },
+            { name: "Midnight Black", hex: "#0f0f14" },
+            { name: "Forest Green", hex: "#163321" }
+          ]
+        },
+        {
+          id: "executive-formal-brief",
+          name: "Executive Formal Brief",
+          category: "Executive Line",
+          price: 24999,
+          originalPrice: 32000,
+          tag: "New",
+          image: "./public/images/executive-formal.png",
+          thumbnails: [
+            "./public/images/executive-formal.png",
+            "./public/images/hero-bag.png",
+            "./public/images/craftsmanship-bag.png"
+          ],
+          tagline: "Power dressing amplified through refined leather goods.",
+          description: "Structured briefcase tote engineered with padded 15-inch laptop compartment, passport organizer, and magnetic document quick-access pocket.",
+          features: [
+            "Scratch-resistant Saffiano leather",
+            "Waterproof velvet interior lining",
+            "Trolley pass-through sleeve",
+            "Padded ergonomic shoulder strap"
+          ],
+          dimensions: {
+            height: "30 cm",
+            width: "40 cm",
+            depth: "9 cm",
+            handleDrop: "18 cm"
+          },
+          colors: [
+            { name: "Obsidian", hex: "#0f0f13" },
+            { name: "Navy Blue", hex: "#141c2b" },
+            { name: "Espresso", hex: "#38231a" }
+          ]
+        }
+      ];
+
+      const testimonials = [
+        {
+          quote: "The quality rivals Parisian fashion houses at a fraction of the cost. The leather feels supple yet remarkably durable.",
+          author: "Elena Rostova",
+          role: "Senior Fashion Editor, Haute Magazine"
+        },
+        {
+          quote: "Holding a Luvia piece is a tactile delight. The gold hardware weight, the stitch precision—it is true luxury.",
+          author: "Ananya Reddy",
+          role: "Creative Director, Vogue India"
+        },
+        {
+          quote: "From the magnetic packaging to the final stitch, every single detail speaks volumes of passion and dedication.",
+          author: "Meera Kapoor",
+          role: "Bride & Luxury Lifestyle Curator"
+        }
+      ];
+
+      const pricingTiers = [
+        {
+          name: "Evening Clutches",
+          priceRange: "₹12,000 – ₹18,000",
+          desc: "Crystal-embellished evening clutches for galas, weddings, and high-profile occasions.",
+          featured: false
+        },
+        {
+          name: "Designer Handbags",
+          priceRange: "₹18,000 – ₹28,000",
+          desc: "Premium Italian leather handbags with gold-plated hardware and timeless architecture.",
+          featured: true
+        },
+        {
+          name: "Limited Collector",
+          priceRange: "₹35,000+",
+          desc: "Hand-numbered collector's pieces, exotic leather accents, and Swarovski crystals.",
+          featured: false
+        },
+        {
+          name: "Luxury Care Suite",
+          priceRange: "₹1,999",
+          desc: "Leather conditioner, organic microfiber cloth, care guide, and satin storage bag.",
+          featured: false
+        }
+      ];
+
+      // Store Context
+      const StoreContext = createContext();
+
+      const StoreProvider = ({ children }) => {
+        const [cart, setCart] = useState([
+          {
+            id: "royal-luxe-tote",
+            name: "Royal Luxe Tote",
+            price: 18999,
+            image: "./public/images/hero-bag.png",
+            color: "Burgundy",
+            quantity: 1
+          }
+        ]);
+        const [isCartOpen, setIsCartOpen] = useState(false);
+        const [activeQuickView, setActiveQuickView] = useState(null);
+        const [wishlist, setWishlist] = useState([]);
+        const [toasts, setToasts] = useState([]);
+
+        const addToast = (message) => {
+          const id = Date.now();
+          setToasts((prev) => [...prev, { id, message }]);
+          setTimeout(() => {
+            setToasts((prev) => prev.filter((t) => t.id !== id));
+          }, 3500);
+        };
+
+        const addToCart = (product, color = 'Classic', quantity = 1) => {
+          setCart((prev) => {
+            const existing = prev.find(
+              (item) => item.id === product.id && item.color === color
+            );
+            if (existing) {
+              return prev.map((item) =>
+                item.id === product.id && item.color === color
+                  ? { ...item, quantity: item.quantity + quantity }
+                  : item
+              );
+            }
+            return [
+              ...prev,
+              {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                color,
+                quantity
+              }
+            ];
+          });
+          addToast(`Added "${product.name}" (${color}) to bag.`);
+          setIsCartOpen(true);
+        };
+
+        const removeFromCart = (id, color) => {
+          setCart((prev) => prev.filter((item) => !(item.id === id && item.color === color)));
+          addToast('Item removed from bag.');
+        };
+
+        const updateQuantity = (id, color, delta) => {
+          setCart((prev) =>
+            prev
+              .map((item) => {
+                if (item.id === id && item.color === color) {
+                  const newQty = item.quantity + delta;
+                  return newQty > 0 ? { ...item, quantity: newQty } : null;
+                }
+                return item;
+              })
+              .filter(Boolean)
+          );
+        };
+
+        const toggleWishlist = (productId) => {
+          setWishlist((prev) => {
+            if (prev.includes(productId)) {
+              addToast('Removed from wishlist.');
+              return prev.filter((id) => id !== productId);
+            } else {
+              addToast('Saved to wishlist!');
+              return [...prev, productId];
+            }
+          });
+        };
+
+        const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        return (
+          <StoreContext.Provider
+            value={{
+              cart,
+              addToCart,
+              removeFromCart,
+              updateQuantity,
+              cartTotal,
+              cartCount,
+              isCartOpen,
+              setIsCartOpen,
+              activeQuickView,
+              setActiveQuickView,
+              wishlist,
+              toggleWishlist,
+              toasts,
+              addToast
+            }}
+          >
+            {children}
+          </StoreContext.Provider>
+        );
+      };
+
+      const useStore = () => useContext(StoreContext);
+
+      // Custom Cursor
+      const CustomCursor = () => {
+        const [pos, setPos] = useState({ x: -100, y: -100 });
+        const [isHovered, setIsHovered] = useState(false);
+
+        useEffect(() => {
+          const handleMouseMove = (e) => setPos({ x: e.clientX, y: e.clientY });
+          const handleMouseOver = (e) => {
+            setIsHovered(!!e.target.closest('button, a, input, select'));
+          };
+          window.addEventListener('mousemove', handleMouseMove);
+          window.addEventListener('mouseover', handleMouseOver);
+          return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseover', handleMouseOver);
+          };
+        }, []);
+
+        return (
+          <React.Fragment>
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '8px',
+                height: '8px',
+                backgroundColor: '#d4af37',
+                borderRadius: '50%',
+                pointerEvents: 'none',
+                zIndex: 9999,
+                transform: `translate3d(${pos.x - 4}px, ${pos.y - 4}px, 0)`
+              }}
+            />
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: isHovered ? '48px' : '28px',
+                height: isHovered ? '48px' : '28px',
+                border: '1px solid rgba(212, 175, 55, 0.6)',
+                borderRadius: '50%',
+                pointerEvents: 'none',
+                zIndex: 9998,
+                transform: `translate3d(${pos.x - (isHovered ? 24 : 14)}px, ${pos.y - (isHovered ? 24 : 14)}px, 0)`,
+                transition: 'width 0.2s ease, height 0.2s ease, transform 0.1s ease-out',
+                backgroundColor: isHovered ? 'rgba(212, 175, 55, 0.08)' : 'transparent'
+              }}
+            />
+          </React.Fragment>
+        );
+      };
+
+      // Navbar
+      const Navbar = () => {
+        const [scrolled, setScrolled] = useState(false);
+        const [menuOpen, setMenuOpen] = useState(false);
+        const { cartCount, setIsCartOpen, wishlist } = useStore();
+        const location = useLocation();
+
+        useEffect(() => {
+          const handleScroll = () => setScrolled(window.scrollY > 40);
+          window.addEventListener('scroll', handleScroll);
+          return () => window.removeEventListener('scroll', handleScroll);
+        }, []);
+
+        useEffect(() => {
+          setMenuOpen(false);
+          window.scrollTo(0, 0);
+        }, [location.pathname]);
+
+        return (
+          <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+            <div className="container">
+              <Link to="/" className="nav-logo">LU<span>VIA</span></Link>
+              <ul className={`nav-links ${menuOpen ? 'open' : ''}`}>
+                <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link></li>
+                <li><a href="#/collection">Collection</a></li>
+                <li><Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>Shop</Link></li>
+                <li><Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>About</Link></li>
+                <li><a href="#/vip-club">VIP Club</a></li>
+              </ul>
+              <div className="nav-actions">
+                <Link to="/shop" className="icon-button" title="Wishlist">
+                  <span style={{ fontSize: '1rem', color: wishlist.length ? 'var(--gold)' : 'inherit' }}>♥</span>
+                  {wishlist.length > 0 && <span className="cart-badge" style={{ background: '#ff4d6d', color: '#fff' }}>{wishlist.length}</span>}
+                </Link>
+                <button className="icon-button" onClick={() => setIsCartOpen(true)} title="Shopping Bag">
+                  <span style={{ fontSize: '1.1rem' }}>🛍</span>
+                  {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                </button>
+                <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </div>
+            </div>
+          </nav>
+        );
+      };
+
+      // Hero
+      const HeroSection = () => (
+        <section className="hero" id="hero">
+          <div className="hero-bg">
+            <img src="./public/images/hero-bag.png" alt="Luvia Leather Handbag" />
+          </div>
+          <div className="hero-overlay" />
+          <div className="container">
+            <div className="hero-content">
+              <span className="hero-label">Artisan Leather Collection 2026</span>
+              <h1 className="hero-title shimmer">Step Into<br />Timeless Elegance</h1>
+              <p className="hero-subtitle">
+                Crafted for presence. Hand-burnished by master artisans. Designed to become an heirloom.
+              </p>
+              <div className="hero-buttons">
+                <Link to="/shop" className="btn btn-primary">Explore Collection</Link>
+                <Link to="/about" className="btn btn-outline">Our Heritage</Link>
+              </div>
+            </div>
+          </div>
+          <div className="hero-scroll">
+            <span>Scroll</span>
+            <div className="scroll-line" />
+          </div>
+        </section>
+      );
+
+      // Collection Grid
+      const CollectionGrid = () => {
+        const { setActiveQuickView, wishlist, toggleWishlist } = useStore();
+        return (
+          <section className="section-pad" id="collection">
+            <div className="container">
+              <div className="section-header">
+                <span className="section-label">Curated Selection</span>
+                <h2 className="section-title">The Signature Collection</h2>
+                <div className="gold-divider" />
+                <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
+                  Each silhouette embodies architectural proportion, precision hardware, and generational leather traditions.
+                </p>
+              </div>
+
+              <div className="collection-grid">
+                {products.map((product) => {
+                  const isWishlisted = wishlist.includes(product.id);
+                  return (
+                    <div key={product.id} className="product-card">
+                      {product.tag && <span className="product-card-badge">{product.tag}</span>}
+                      <div className="product-card-img">
+                        <img src={product.image} alt={product.name} />
+                        <div className="product-card-overlay">
+                          <button className="btn btn-primary" style={{ padding: '10px 18px', fontSize: '0.78rem' }} onClick={() => setActiveQuickView(product)}>
+                            Quick View
+                          </button>
+                          <button className="icon-button" style={{ background: 'rgba(0,0,0,0.6)', borderColor: isWishlisted ? 'var(--danger)' : 'var(--border-subtle)' }} onClick={() => toggleWishlist(product.id)}>
+                            <span style={{ color: isWishlisted ? 'var(--danger)' : '#fff' }}>♥</span>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="product-card-info">
+                        <span className="product-category">{product.category}</span>
+                        <h3 className="product-name">{product.name}</h3>
+                        <p className="product-desc">{product.tagline}</p>
+                        <div className="product-card-bottom">
+                          <span className="product-price">₹{product.price.toLocaleString()}</span>
+                          <Link to="/shop" className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '0.75rem' }}>Details</Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      };
+
+      // Craftsmanship
+      const CraftsmanshipSection = () => (
+        <section className="craftsmanship section-pad" id="craftsmanship">
+          <div className="container">
+            <div className="craft-grid">
+              <div className="craft-image">
+                <img src="./public/images/craftsmanship.png" alt="Artisan Craftsmanship" />
+              </div>
+              <div>
+                <span className="section-label">Artisan Provenance</span>
+                <h2 className="section-title shimmer" style={{ textAlign: 'left' }}>Built on Purpose,<br />Driven by Craft</h2>
+                <div className="gold-divider" style={{ marginLeft: 0 }} />
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '18px', lineHeight: '1.7' }}>
+                  In an era of mass production, Luvia operates on deliberate patience. Each bag passes through more than 200 distinct hand operations in our Tuscan ateliers.
+                </p>
+                <div className="craft-features">
+                  <div className="craft-feature">
+                    <h4>200+ Hand Steps</h4>
+                    <p>Meticulously saddle-stitched with waxed linen thread.</p>
+                  </div>
+                  <div className="craft-feature">
+                    <h4>24K Gold Hardware</h4>
+                    <p>Solid brass fittings electroplated with scratch-shield coating.</p>
+                  </div>
+                  <div className="craft-feature">
+                    <h4>Tuscan Tanneries</h4>
+                    <p>Slow vegetable tanning process certified in Italy.</p>
+                  </div>
+                  <div className="craft-feature">
+                    <h4>Heirloom Guarantee</h4>
+                    <p>Lifetime restoration concierge with authenticated certificate.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+
+      // Testimonial
+      const TestimonialSlider = () => {
+        const [current, setCurrent] = useState(0);
+        useEffect(() => {
+          const t = setInterval(() => setCurrent((prev) => (prev + 1) % testimonials.length), 6000);
+          return () => clearInterval(t);
+        }, []);
+        const item = testimonials[current];
+        return (
+          <section className="testimonials section-pad">
+            <div className="container">
+              <div className="section-header">
+                <span className="section-label">Critical Acclaim</span>
+                <h2 className="section-title">Words of Elegance</h2>
+                <div className="gold-divider" />
+              </div>
+              <div className="testimonial-carousel">
+                <div className="testimonial-card">
+                  <div className="testimonial-stars">✦ ✦ ✦ ✦ ✦</div>
+                  <p className="testimonial-quote">"{item.quote}"</p>
+                  <p className="testimonial-author">{item.author}</p>
+                  <p className="testimonial-role">{item.role}</p>
+                </div>
+                <div className="carousel-dots">
+                  {testimonials.map((_, i) => (
+                    <div key={i} className={`carousel-dot ${i === current ? 'active' : ''}`} onClick={() => setCurrent(i)} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      };
+
+      // Limited Edition
+      const LimitedEditionSection = () => {
+        const { addToast } = useStore();
+        const [t, setT] = useState({ days: 28, hours: 14, mins: 35, secs: 42 });
+        useEffect(() => {
+          const interval = setInterval(() => {
+            setT((prev) => (prev.secs > 0 ? { ...prev, secs: prev.secs - 1 } : { ...prev, mins: prev.mins - 1, secs: 59 }));
+          }, 1000);
+          return () => clearInterval(interval);
+        }, []);
+        return (
+          <section className="limited-edition section-pad" id="limited-section">
+            <div className="container">
+              <div className="limited-grid">
+                <div className="limited-image">
+                  <img src="./public/images/limited-edition-bag.png" alt="Limited Edition" />
+                </div>
+                <div>
+                  <span className="section-label">Strictly Numbered Drop</span>
+                  <h2 className="section-title shimmer" style={{ textAlign: 'left' }}>The Imperial Royal Edition</h2>
+                  <div className="gold-divider" style={{ marginLeft: 0 }} />
+                  <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '20px' }}>
+                    Only 100 individually numbered specimens will ever exist. Features 24K brushed rose-gold lock hardware and hand-embossed provenance certificates.
+                  </p>
+                  <div className="countdown-box">
+                    <div className="countdown-item"><div className="countdown-val">{t.days}</div><div className="countdown-unit">Days</div></div>
+                    <div className="countdown-item"><div className="countdown-val">{t.hours}</div><div className="countdown-unit">Hours</div></div>
+                    <div className="countdown-item"><div className="countdown-val">{t.mins}</div><div className="countdown-unit">Mins</div></div>
+                    <div className="countdown-item"><div className="countdown-val">{t.secs}</div><div className="countdown-unit">Secs</div></div>
+                  </div>
+                  <button className="btn btn-primary" onClick={() => addToast('VIP Allocation Request registered with Private Concierge.')}>
+                    Reserve Allocation
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      };
+
+      // Packaging
+      const PackagingSection = () => (
+        <section className="packaging section-pad" id="packaging">
+          <div className="container">
+            <div className="packaging-grid">
+              <div>
+                <span className="section-label">The Unboxing Ritual</span>
+                <h2 className="section-title">Sensory Perfection</h2>
+                <div className="gold-divider" style={{ marginLeft: 0 }} />
+                <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '24px' }}>
+                  Delivered in our signature magnetic closure box, enveloped in an organic satin dust bag with a handwritten thank-you wax seal.
+                </p>
+                <div className="packaging-checklist">
+                  <div className="checklist-item"><span className="checklist-icon">✦</span><span>Magnetic-closure rigid presentation box</span></div>
+                  <div className="checklist-item"><span className="checklist-icon">✦</span><span>Organic satin dust protection bag</span></div>
+                  <div className="checklist-item"><span className="checklist-icon">✦</span><span>NFC-enabled Certificate of Authenticity</span></div>
+                  <div className="checklist-item"><span className="checklist-icon">✦</span><span>Wax-sealed thank you card & leather balm</span></div>
+                </div>
+              </div>
+              <div className="craft-image">
+                <img src="./public/images/craftsmanship-bag.png" alt="Unboxing packaging" />
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+
+      // VIP Club
+      const VipClubSection = () => {
+        const [email, setEmail] = useState('');
+        const { addToast } = useStore();
+        const submit = (e) => {
+          e.preventDefault();
+          if (!email) return;
+          addToast(`Welcome to the Inner Circle, ${email}.`);
+          setEmail('');
+        };
+        return (
+          <section className="vip-club section-pad" id="vip-club">
+            <div className="container">
+              <div className="vip-card">
+                <span className="section-label">Exclusive Privilege</span>
+                <h2 className="section-title shimmer">Join the Inner Circle</h2>
+                <div className="gold-divider" />
+                <p style={{ color: 'var(--text-secondary)', maxWidth: '580px', margin: '0 auto 24px' }}>
+                  Receive private allocations 48 hours before releases and private salon exhibition invites.
+                </p>
+                <form className="vip-form" onSubmit={submit}>
+                  <input type="email" className="vip-input" placeholder="Enter your confidential email..." value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <button type="submit" className="btn btn-primary">Join Circle</button>
+                </form>
+                <div className="vip-perks">
+                  <span>✦ Salon Invites</span>
+                  <span>✦ 48h Drop Pre-Access</span>
+                  <span>✦ Bespoke Monogramming</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      };
+
+      // Pages
+      const HomePage = () => (
+        <main>
+          <HeroSection />
+          <CollectionGrid />
+          <CraftsmanshipSection />
+          <TestimonialSlider />
+          <LimitedEditionSection />
+          <PackagingSection />
+          <VipClubSection />
+        </main>
+      );
+
+      const ProductPage = () => {
+        const [selectedId, setSelectedId] = useState(products[0].id);
+        const { addToCart } = useStore();
+        const product = products.find((p) => p.id === selectedId) || products[0];
+        const [activeImg, setActiveImg] = useState(product.thumbnails[0]);
+        const [selectedColor, setSelectedColor] = useState(product.colors[0].name);
+        const [addKit, setAddKit] = useState(false);
+
+        useEffect(() => {
+          setActiveImg(product.thumbnails[0]);
+          setSelectedColor(product.colors[0].name);
+        }, [product.id]);
+
+        return (
+          <main style={{ paddingTop: '110px' }}>
+            <div className="container">
+              <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '16px', marginBottom: '24px', borderBottom: '1px solid var(--border-subtle)' }}>
+                {products.map((p) => (
+                  <button key={p.id} className={`btn ${p.id === product.id ? 'btn-primary' : 'btn-outline'}`} style={{ padding: '10px 20px', fontSize: '0.8rem', whiteSpace: 'nowrap' }} onClick={() => setSelectedId(p.id)}>
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+
+              <div className="product-hero-layout" style={{ marginBottom: '80px' }}>
+                <div className="gallery-container">
+                  <div className="gallery-main">
+                    <img src={activeImg} alt={product.name} />
+                  </div>
+                  <div className="gallery-thumbs">
+                    {product.thumbnails.map((t, idx) => (
+                      <div key={idx} className={`gallery-thumb ${activeImg === t ? 'active' : ''}`} onClick={() => setActiveImg(t)}>
+                        <img src={t} alt="" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="product-info-panel">
+                  <span className="section-label">{product.category}</span>
+                  <h1 className="section-title" style={{ textAlign: 'left', fontSize: '2.4rem' }}>{product.name}</h1>
+                  <p style={{ fontStyle: 'italic', color: 'var(--gold)' }}>"{product.tagline}"</p>
+                  <div className="product-price-block">
+                    <span className="current-price">₹{product.price.toLocaleString()}</span>
+                    <span className="original-price">₹{product.originalPrice.toLocaleString()}</span>
+                    <span className="discount-tag">In Stock & Verified</span>
+                  </div>
+                  <p style={{ color: 'var(--text-secondary)', lineHeight: '1.7' }}>{product.description}</p>
+                  <div>
+                    <label style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-secondary)' }}>
+                      Colorway: <strong style={{ color: 'var(--cream)' }}>{selectedColor}</strong>
+                    </label>
+                    <div className="color-options">
+                      {product.colors.map((c) => (
+                        <button key={c.name} className={`color-btn ${selectedColor === c.name ? 'active' : ''}`} style={{ backgroundColor: c.hex }} onClick={() => setSelectedColor(c.name)} />
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                    <h4 style={{ fontSize: '0.85rem', letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '14px' }}>Atelier Specifications</h4>
+                    <ul className="spec-list">
+                      {product.features.map((f, i) => <li key={i}>✦ {f}</li>)}
+                    </ul>
+                  </div>
+                  <div className="bundle-box">
+                    <div>
+                      <h4 style={{ color: 'var(--gold-light)', fontSize: '0.95rem' }}>✦ Add Luxury Leather Care Suite</h4>
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Organic balm & buffer for ₹1,999 (save 35%).</p>
+                    </div>
+                    <input type="checkbox" checked={addKit} onChange={(e) => setAddKit(e.target.checked)} style={{ width: '20px', height: '20px', accentColor: 'var(--gold)' }} />
+                  </div>
+                  <button className="btn btn-primary" style={{ padding: '16px 36px', fontSize: '1rem' }} onClick={() => addToCart(product, selectedColor, 1)}>
+                    Acquire &middot; Add to Shopping Bag
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <section className="section-pad" style={{ background: '#0a0a0f', borderTop: '1px solid var(--border-subtle)' }}>
+              <div className="container">
+                <div className="section-header">
+                  <span className="section-label">Investment & Value</span>
+                  <h2 className="section-title">Premium Editions Overview</h2>
+                  <div className="gold-divider" />
+                </div>
+                <div className="pricing-tiers-grid">
+                  {pricingTiers.map((tier, idx) => (
+                    <div key={idx} className={`pricing-card ${tier.featured ? 'featured' : ''}`}>
+                      <h3 className="pricing-tier-name">{tier.name}</h3>
+                      <p className="pricing-tier-cost">{tier.priceRange}</p>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>{tier.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </main>
+        );
+      };
+
+      const AboutPage = () => (
+        <main style={{ paddingTop: '80px' }}>
+          <section className="about-hero">
+            <div className="container">
+              <span className="section-label">Our Story & Heritage</span>
+              <h1 className="section-title shimmer">The Maison of Luvia</h1>
+              <div className="gold-divider" />
+              <p style={{ color: 'var(--text-secondary)', maxWidth: '680px', margin: '0 auto', fontSize: '1.1rem', lineHeight: '1.8' }}>
+                Where timeless Italian artisanal leather traditions merge with modern sculptural design. Founded with the conviction that quiet excellence is the ultimate luxury.
+              </p>
+            </div>
+          </section>
+
+          <section className="section-pad">
+            <div className="container">
+              <div className="about-split">
+                <div className="about-img-box">
+                  <img src="./public/images/craftsmanship-bag.png" alt="Craftsmanship" />
+                </div>
+                <div>
+                  <span className="section-label">Brand Philosophy</span>
+                  <h2 className="section-title shimmer" style={{ textAlign: 'left' }}>Built on Purpose,<br />Driven by Craft</h2>
+                  <div className="gold-divider" style={{ marginLeft: 0 }} />
+                  <p style={{ color: 'var(--text-secondary)', lineHeight: '1.8', marginBottom: '18px' }}>
+                    Luvia was born from a singular philosophy: what you carry defines how you move through the world. Every silhouette we create is a quiet declaration of confidence.
+                  </p>
+                  <p style={{ color: 'var(--text-secondary)', lineHeight: '1.8' }}>
+                    We select leathers from multi-generational family tanneries in Tuscany and Veneto to create heirlooms made for decades.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="section-pad" style={{ background: 'var(--charcoal)' }}>
+            <div className="container">
+              <div className="about-split reverse">
+                <div className="about-img-box">
+                  <img src="./public/images/founder.png" alt="Founder Aria Mehra" />
+                </div>
+                <div>
+                  <span className="section-label">Creative Direction</span>
+                  <h2 className="section-title" style={{ textAlign: 'left' }}>A Legacy of<br />Modern Elegance</h2>
+                  <div className="gold-divider" style={{ marginLeft: 0 }} />
+                  <div className="founder-quote">
+                    "I wanted to design pieces that speak without saying a single word. When you carry a Luvia, you carry your poise and ambition."
+                  </div>
+                  <p style={{ color: 'var(--gold)', fontWeight: 600 }}>— Aria Mehra, Founder & Creative Director</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="section-pad" style={{ background: 'linear-gradient(180deg, var(--charcoal) 0%, #0d1a14 100%)' }}>
+            <div className="container">
+              <div className="section-header">
+                <span className="section-label">Our Pillars</span>
+                <h2 className="section-title">Values That Define Us</h2>
+                <div className="gold-divider" />
+              </div>
+              <div className="values-grid">
+                <div className="value-card">
+                  <div className="value-icon-wrapper">✦</div>
+                  <h3 style={{ color: 'var(--cream)', marginBottom: '12px' }}>Artisanal Devotion</h3>
+                  <p style={{ color: 'var(--text-secondary)' }}>Over 200 hand operations per silhouette with waxed linen thread.</p>
+                </div>
+                <div className="value-card">
+                  <div className="value-icon-wrapper">⚜</div>
+                  <h3 style={{ color: 'var(--cream)', marginBottom: '12px' }}>Elegance Without Noise</h3>
+                  <p style={{ color: 'var(--text-secondary)' }}>Subtle architectural forms over loud branding. Solid brass hardware weight.</p>
+                </div>
+                <div className="value-card">
+                  <div className="value-icon-wrapper">★</div>
+                  <h3 style={{ color: 'var(--cream)', marginBottom: '12px' }}>Empowered Presence</h3>
+                  <p style={{ color: 'var(--text-secondary)' }}>Designed to evoke quiet, unshakable confidence in the modern leader.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <VipClubSection />
+        </main>
+      );
+
+      // Overlays
+      const CartDrawer = () => {
+        const { isCartOpen, setIsCartOpen, cart, removeFromCart, updateQuantity, cartTotal, addToast } = useStore();
+        return (
+          <React.Fragment>
+            <div className={`cart-overlay ${isCartOpen ? 'open' : ''}`} onClick={() => setIsCartOpen(false)} />
+            <div className={`cart-drawer ${isCartOpen ? 'open' : ''}`}>
+              <div className="cart-header">
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem' }}>Your Shopping Bag ({cart.length})</h3>
+                <button onClick={() => setIsCartOpen(false)} style={{ fontSize: '1.4rem', color: 'var(--text-secondary)' }}>✕</button>
+              </div>
+              <div className="cart-body">
+                {cart.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                    <p style={{ fontSize: '2.5rem', marginBottom: '16px' }}>✦</p>
+                    <h4 style={{ color: 'var(--cream)', marginBottom: '8px' }}>Your bag is empty</h4>
+                    <p style={{ fontSize: '0.88rem' }}>Discover our handcrafted collection.</p>
+                  </div>
+                ) : (
+                  cart.map((item) => (
+                    <div key={`${item.id}-${item.color}`} className="cart-item">
+                      <img src={item.image} alt={item.name} />
+                      <div className="cart-item-details">
+                        <h4 style={{ fontSize: '1rem', color: 'var(--cream)', marginBottom: '4px' }}>{item.name}</h4>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--gold)', marginBottom: '8px' }}>Color: {item.color}</p>
+                        <p style={{ fontWeight: 600, color: 'var(--cream)', marginBottom: '10px' }}>₹{item.price.toLocaleString()}</p>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-subtle)', borderRadius: '4px' }}>
+                            <button onClick={() => updateQuantity(item.id, item.color, -1)} style={{ padding: '2px 8px', color: 'var(--cream)' }}>-</button>
+                            <span style={{ padding: '2px 10px', fontSize: '0.85rem' }}>{item.quantity}</span>
+                            <button onClick={() => updateQuantity(item.id, item.color, 1)} style={{ padding: '2px 8px', color: 'var(--cream)' }}>+</button>
+                          </div>
+                          <button onClick={() => removeFromCart(item.id, item.color)} style={{ fontSize: '0.78rem', color: 'var(--danger)' }}>Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              {cart.length > 0 && (
+                <div className="cart-footer">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                    <span>White-Glove Shipping</span>
+                    <span style={{ color: 'var(--success)' }}>COMPLIMENTARY</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '1.2rem', fontWeight: 700, color: 'var(--cream)' }}>
+                    <span>Subtotal</span>
+                    <span style={{ color: 'var(--gold)' }}>₹{cartTotal.toLocaleString()}</span>
+                  </div>
+                  <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => addToast('Proceeding to VIP Encrypted Checkout...')}>
+                    VIP Secure Checkout
+                  </button>
+                </div>
+              )}
+            </div>
+          </React.Fragment>
+        );
+      };
+
+      const QuickViewModal = () => {
+        const { activeQuickView, setActiveQuickView, addToCart } = useStore();
+        const [selColor, setSelColor] = useState('');
+        if (!activeQuickView) return null;
+        const color = selColor || activeQuickView.colors?.[0]?.name || 'Classic';
+        return (
+          <div className="modal-backdrop" onClick={() => setActiveQuickView(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close-btn" onClick={() => setActiveQuickView(null)}>✕</button>
+              <div style={{ background: '#0e0e16', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={activeQuickView.image} alt={activeQuickView.name} style={{ maxHeight: '380px', objectFit: 'contain' }} />
+              </div>
+              <div style={{ padding: '36px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <span className="product-category">{activeQuickView.category}</span>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--cream)' }}>{activeQuickView.name}</h2>
+                <p style={{ fontStyle: 'italic', color: 'var(--gold)', fontSize: '0.9rem' }}>"{activeQuickView.tagline}"</p>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{activeQuickView.description}</p>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: 'var(--gold)', fontWeight: 700 }}>
+                    ₹{activeQuickView.price.toLocaleString()}
+                  </span>
+                </div>
+                {activeQuickView.colors && (
+                  <div>
+                    <label style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Color: <strong style={{ color: 'var(--cream)' }}>{color}</strong></label>
+                    <div className="color-options">
+                      {activeQuickView.colors.map((c) => (
+                        <button key={c.name} className={`color-btn ${color === c.name ? 'active' : ''}`} style={{ backgroundColor: c.hex }} onClick={() => setSelColor(c.name)} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <button className="btn btn-primary" style={{ marginTop: '12px', width: '100%' }} onClick={() => { addToCart(activeQuickView, color, 1); setActiveQuickView(null); }}>
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const Toast = () => {
+        const { toasts } = useStore();
+        if (!toasts.length) return null;
+        return (
+          <div className="toast-container">
+            {toasts.map((t) => (
+              <div key={t.id} className="toast">
+                <span style={{ color: 'var(--gold)' }}>✦</span>
+                <span>{t.message}</span>
+              </div>
+            ))}
+          </div>
+        );
+      };
+
+      const Footer = () => (
+        <footer className="footer">
+          <div className="container">
+            <div className="footer-grid">
+              <div className="footer-brand">
+                <Link to="/" className="nav-logo">LU<span>VIA</span></Link>
+                <p>Timeless luxury crafted for modern elegance. Every bag is an uncompromising promise of artistry, endurance, and presence.</p>
+                <p style={{ fontStyle: 'italic', color: 'var(--gold)' }}>"Carry Confidence."</p>
+              </div>
+              <div className="footer-col">
+                <h4>Collections</h4>
+                <ul className="footer-links">
+                  <li><Link to="/shop">Designer Handbags</Link></li>
+                  <li><Link to="/shop">Evening Clutches</Link></li>
+                  <li><Link to="/shop">Luxury Tote Bags</Link></li>
+                </ul>
+              </div>
+              <div className="footer-col">
+                <h4>Heritage</h4>
+                <ul className="footer-links">
+                  <li><Link to="/about">About Luvia</Link></li>
+                  <li><Link to="/about">Artisan Tanneries</Link></li>
+                  <li><Link to="/about">Founder's Vision</Link></li>
+                </ul>
+              </div>
+              <div className="footer-col">
+                <h4>Client Care</h4>
+                <ul className="footer-links">
+                  <li><a href="mailto:concierge@luvia.luxury">Private Concierge</a></li>
+                  <li><a href="#/packaging">Complimentary Shipping</a></li>
+                  <li><a href="#/vip-club">VIP Membership</a></li>
+                </ul>
+              </div>
+            </div>
+            <div className="footer-bottom">
+              <p>&copy; {new Date().getFullYear()} LUVIA Luxury Maison. All rights reserved.</p>
+              <div className="footer-socials">
+                <a href="#instagram">Instagram</a>
+                <a href="#pinterest">Pinterest</a>
+                <a href="#editorial">Editorial</a>
+              </div>
+            </div>
+          </div>
+        </footer>
+      );
+
+      const App = () => (
+        <div className="app-root">
+          <CustomCursor />
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ProductPage />} />
+            <Route path="/product" element={<ProductPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="*" element={<HomePage />} />
+          </Routes>
+          <Footer />
+          <CartDrawer />
+          <QuickViewModal />
+          <Toast />
+        </div>
+      );
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(
+        <Router>
+          <StoreProvider>
+            <App />
+          </StoreProvider>
+        </Router>
+      );
+    </script>
+  </body>
+</html>

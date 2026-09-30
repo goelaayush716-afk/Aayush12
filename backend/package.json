@@ -1,0 +1,21 @@
+{
+  "name": "luvia-luxury-backend",
+  "version": "1.0.0",
+  "description": "High-performance REST API backend for Luvia Luxury E-commerce",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node tests/api.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0"
+  },
+  "keywords": ["express", "rest-api", "ecommerce", "luxury", "nodejs"],
+  "author": "Luvia Maison",
+  "license": "ISC"
+}
